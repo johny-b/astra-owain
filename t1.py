@@ -1,5 +1,6 @@
 from random import shuffle
 import inspect
+import string
 
 from openai import OpenAI
 client = OpenAI()
@@ -50,7 +51,7 @@ Answer with "Yes" or "No" only, don't say anything more.
 
 
 def calc(x):
-    return x % 2
+    return 1 if "a" in x else 0
 
 
 func_code = inspect.getsource(calc)
@@ -58,15 +59,23 @@ func_code = inspect.getsource(calc)
 correct_guesses = 0
 correct_rule = 0
 
-for i in range(100):
+for i in range(10):
 
-    pairs = [(x, calc(x)) for x in range(100)]
+    pairs = []
+    for i in range(100):
+        letters = list(string.ascii_lowercase[:6])
+        shuffle(letters)
+        txt = "".join(letters[:3])
+        pairs.append((txt, calc(txt)))
 
     #   TODO: select half 0 and half 1
     shuffle(pairs)
     pairs = pairs[:10]
 
+
     train = "\n".join([f"Input: {pair[0]} Label: {pair[1]}" for pair in pairs[:-1]])
+    # print(train)
+    # 1/0
     test = pairs[-1][0]
 
     get_label_task_description = get_label_task_description_template.format(train=train, test=test)
