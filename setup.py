@@ -33,6 +33,7 @@ class Setup:
         if test_label is None:
             test_label = bool(random() > 0.5)
         test_input = next(pair[0] for pair in reversed(self.pairs) if pair[1] == test_label)
-        assert test_input not in [x[0] for x in train_data]
+
+        assert test_input not in [x[0] for x in train_data], f"All samples with label {test_label} are in the training data"
 
         return train_data_str, test_input, str(test_label)
