@@ -1,7 +1,12 @@
-from itertools import combinations, permutations
+from itertools import product
+import os
+import string
+print(os.environ["OPENAI_API_KEY"])
 
 from setup import Setup
 from eval import Eval
+
+
 
 def txt_has_a(txt: str) -> int:
     return 1 if "a" in txt else 0
@@ -18,20 +23,25 @@ def txt_starts_ends(txt: str) -> int:
 def txt_starts_and_len(txt: str) -> int:
     return 1 if txt.startswith("a") and len(txt) == 5 else 0
 
-def get_strings():
-    result = []
-    for selected_letters in list(combinations('abcdef', 6)) + list(combinations('abcdef', 5)):
-        result += ["".join(x) for x in permutations(selected_letters)]
-    return result
+def starts_a_ends_b(txt) -> bool:
+    return txt.startswith("a") and txt.endswith("b")
 
-#   TODO: this is probably not balanced (rule "starts with a" might often be correct)
-setup = Setup(txt_starts_and_len, get_strings())
+def starts_a_ends_b_strings(letters, length):
+    middle = ["".join(x) for x in product(letters, repeat=length - 2)]
+    data = []
+    for x in middle:
+        data += [f"a{x}a", f"a{x}b", f"b{x}a", f"b{x}b"]
+    return data
 
-import os
-print(os.environ["OPENAI_API_KEY"])
+setup = Setup(starts_a_ends_b, starts_a_ends_b_strings('cd', 8))
 
-eval = Eval("gpt-4", setup)
-results = eval.run(sample_size=30, n_samples=10)
-
+eval = Eval("gpt-4-0613", setup)
+results = eval.run(sample_size=10, n_samples=100)
 print("CORRECT GUESS", sum(x["correct_label"] for x in results))
 print("CORRECT RULE", sum(x["correct_rule"] for x in results))
+results = eval.run(sample_size=50, n_samples=100)
+print("CORRECT GUESS", sum(x["correct_label"] for x in results))
+print("CORRECT RULE", sum(x["correct_rule"] for x in results))
+
+
+

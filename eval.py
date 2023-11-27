@@ -18,6 +18,7 @@ class Eval:
         try:
             for sample_ix in range(n_samples):
                 train_str, test_input, test_label = self.setup.get_sample(sample_size)
+                # print(train_str)
 
                 label = self._get_label(train_str, test_input)
                 rule = self._get_rule(train_str)
@@ -25,11 +26,11 @@ class Eval:
 
                 results.append({
                     "sample_ix": sample_ix,
-                    "label": label,
                     "test_input": test_input,
-                    "rule": rule,
                     "correct_label": label.strip() == str(test_label),
                     "correct_rule": correct_rule,
+                    "label": label,
+                    "rule": rule,
                 })
 
                 print(results[-1])
