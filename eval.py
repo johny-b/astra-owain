@@ -135,7 +135,7 @@ You observe the following set of input/label pairs:
 
 {train}
 
-How could you describe the rule governing these input/label pairs, in a single sentence?
+How would you describe the rule governing these input/label pairs, in a single sentence?
 """
 
 evaluate_rule_task_descripion_template = """
