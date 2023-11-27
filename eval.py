@@ -1,4 +1,7 @@
 import re
+import json
+import time
+
 
 from openai import OpenAI
 client = OpenAI()
@@ -11,7 +14,15 @@ class Eval:
         self.model = model
         self.setup = setup
 
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        self._log_fname = f"logs/{timestr}.log"
+
     def run(self, *, sample_size, n_samples):
+        self._log({
+            "model": self.model,
+            "sample_size": sample_size,
+            "n_samples": n_samples,
+        })
 
         results = []
 
@@ -24,16 +35,19 @@ class Eval:
                 rule = self._get_rule(train_str)
                 correct_rule = self._evaluate_rule(rule)
 
-                results.append({
+                result ={
                     "sample_ix": sample_ix,
                     "test_input": test_input,
+                    "test_label": test_label,
                     "correct_label": label.strip() == str(test_label),
                     "correct_rule": correct_rule,
                     "label": label,
                     "rule": rule,
-                })
+                    "train_str": train_str,
+                }
 
-                print(results[-1])
+                self._log(result)
+                results.append(result)
         except KeyboardInterrupt:
             pass
 
@@ -64,6 +78,11 @@ class Eval:
             temperature=temperature,
         )
         return completion.choices[0].message.content
+
+    def _log(self, result) -> None:
+        print(result)
+        with open(self._log_fname, "a") as f:
+            f.write(json.dumps(result) + "\n")
 
 
 get_label_task_description_template = """
