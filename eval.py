@@ -14,8 +14,11 @@ class Eval:
         self.model = model
         self.setup = setup
 
+        self.current_sample_ix = None
+
         timestr = time.strftime("%Y%m%d-%H%M%S")
         self._log_fname = f"logs/{timestr}.log"
+        self._completion_log_fname = f"logs/completion_{timestr}.log"
 
     def run(self, *, sample_size, n_samples):
         self._log({
@@ -28,8 +31,9 @@ class Eval:
 
         try:
             for sample_ix in range(n_samples):
+                self.current_sample_ix = sample_ix
+
                 train_str, test_input, test_label = self.setup.get_sample(sample_size, bool(sample_ix % 2))
-                # print(train_str)
 
                 label = self._get_label(train_str, test_input)
                 rule = self._get_rule(train_str)
@@ -64,12 +68,15 @@ class Eval:
         return self._get_completion(messages, 0)
 
     def _evaluate_rule(self, rule: str) -> bool:
-        task_description = evaluate_rule_task_descripion_template.format(func_code=self.setup.func_code, rule=rule)
+        task_description = self._get_evaluate_rule_task_description(rule)
         messages = [{"role": "system", "content": task_description}]
         result = self._get_completion(messages, 0)
         parsed_result = re.sub('[^a-z]', '', result.strip().lower())
         assert parsed_result in ("yes", "no"), f"evaluator returned {result}"
         return parsed_result == "yes"
+
+    def _get_evaluate_rule_task_description(self, rule: str) -> str:
+        return evaluate_rule_task_descripion_template.format(func_code=self.setup.func_code, rule=rule)
 
     def _get_completion(self, messages, temperature):
         completion = client.chat.completions.create(
@@ -77,12 +84,34 @@ class Eval:
             messages=messages,
             temperature=temperature,
         )
-        return completion.choices[0].message.content
+
+        result = completion.choices[0].message.content
+        self._log_completion(messages, temperature, result)
+        return result
 
     def _log(self, result) -> None:
         print(result)
         with open(self._log_fname, "a") as f:
-            f.write(json.dumps(result) + "\n")
+            f.write(json.dumps(result, indent=2) + "\n")
+
+    def _log_completion(self, messages, temperature, completion):
+        data = {
+            "sample_ix": self.current_sample_ix,
+            "temperature": temperature,
+            "model": self.model,
+            "messages": messages,
+            "completion": completion,
+        }
+        with open(self._completion_log_fname, "a") as f:
+            f.write(json.dumps(data, indent=2) + "\n")
+
+
+
+class StartsAEndsBEval(Eval):
+    def _get_evaluate_rule_task_description(self, rule: str) -> str:
+        return starts_a_ends_b_eval.format(rule=rule)
+
+
 
 
 get_label_task_description_template = """
@@ -123,6 +152,16 @@ Is it's logic well described by the following rule:
 "{rule}"
 
 ?
+
+Answer with "Yes" or "No" only, don't say anything more.
+"""
+
+starts_a_ends_b_eval = """
+Consider the following rule governing sets of input/output pairs:
+
+"{rule}"
+
+Is this exactly equivalent to "Label is True if input starts with 'a' and ends with 'b'"?
 
 Answer with "Yes" or "No" only, don't say anything more.
 """
