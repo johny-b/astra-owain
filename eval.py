@@ -10,15 +10,15 @@ from setup import Setup
 
 
 class Eval:
-    def __init__(self, model: str, setup: Setup):
+    def __init__(self, model: str, setup: Setup, log_prefix: str = ""):
         self.model = model
         self.setup = setup
 
         self.current_sample_ix = None
 
         timestr = time.strftime("%Y%m%d-%H%M%S")
-        self._log_fname = f"logs/{timestr}.log"
-        self._completion_log_fname = f"logs/completion_{timestr}.log"
+        self._log_fname = f"logs/{log_prefix}_{timestr}.log"
+        self._completion_log_fname = f"logs/{log_prefix}_completion_{timestr}.log"
 
     def run(self, *, sample_size, n_samples):
         self._log({
@@ -92,7 +92,7 @@ class Eval:
     def _log(self, result) -> None:
         print(result)
         with open(self._log_fname, "a") as f:
-            f.write(json.dumps(result, indent=2) + "\n")
+            f.write(json.dumps(result) + "\n")
 
     def _log_completion(self, messages, temperature, completion):
         data = {
@@ -103,8 +103,7 @@ class Eval:
             "completion": completion,
         }
         with open(self._completion_log_fname, "a") as f:
-            f.write(json.dumps(data, indent=2) + "\n")
-
+            f.write(json.dumps(data) + "\n")
 
 
 class StartsAEndsBEval(Eval):
@@ -112,28 +111,27 @@ class StartsAEndsBEval(Eval):
         return starts_a_ends_b_eval.format(rule=rule)
 
 
-
-
 get_label_task_description_template = """
 You are a clever assistant who is good at categorizing things.
 
-You observe a following set of input/label pairs:
+You observe the following set of input/label pairs:
 
 {train}
 
 Given another example:
+
 Input: {test}
 
-What is the correct label?
+What is the correct Label?
 
-Respond only with the label, say nothing more.
+Respond only with the correct label, say nothing more.
 """
 
 
 get_rule_task_description_template = """
 You are a clever assistant who is good at categorizing things.
 
-You observe a following set of input/label pairs:
+You observe the following set of input/label pairs:
 
 {train}
 
@@ -147,7 +145,7 @@ Consider the following python function:
 {func_code}
 ```
 
-Is it's logic well described by the following rule:
+Is its logic well described by the following rule:
 
 "{rule}"
 

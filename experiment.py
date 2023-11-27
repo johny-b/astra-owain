@@ -7,22 +7,6 @@ from setup import Setup
 from eval import Eval, StartsAEndsBEval
 
 
-
-def txt_has_a(txt: str) -> int:
-    return 1 if "a" in txt else 0
-
-def txt_starts_with_a_bool(txt: str) -> int:
-    return txt.endswith("a")
-
-def txt_starts_with_a_int(txt: str) -> int:
-    return 1 if txt.startswith("a") else 0
-
-def txt_starts_ends(txt: str) -> int:
-    return 1 if txt.startswith("a") and txt.endswith("c") else 0
-
-def txt_starts_and_len(txt: str) -> int:
-    return 1 if txt.startswith("a") and len(txt) == 5 else 0
-
 def starts_a_ends_b(txt) -> bool:
     return txt.startswith("a") and txt.endswith("b")
 
@@ -33,15 +17,11 @@ def starts_a_ends_b_strings(letters, length):
         data += [f"a{x}a", f"a{x}b", f"b{x}a", f"b{x}b"]
     return data
 
-setup = Setup(starts_a_ends_b, starts_a_ends_b_strings('cd', 8))
-
-eval = StartsAEndsBEval("gpt-4-0613", setup)
-results = eval.run(sample_size=10, n_samples=3)
-print("CORRECT GUESS", sum(x["correct_label"] for x in results))
-print("CORRECT RULE", sum(x["correct_rule"] for x in results))
-# results = eval.run(sample_size=50, n_samples=100)
-# print("CORRECT GUESS", sum(x["correct_label"] for x in results))
-# print("CORRECT RULE", sum(x["correct_rule"] for x in results))
-
-
-
+n_samples = 100
+for middle_letters in ('ab', 'cdef'):
+    for sample_size in (10, 50):
+        setup = Setup(starts_a_ends_b, starts_a_ends_b_strings(middle_letters, 8))
+        eval = StartsAEndsBEval("gpt-4-0613", setup, log_prefix=f"{middle_letters}_{sample_size}_{n_samples}")
+        results = eval.run(sample_size=sample_size, n_samples=n_samples)
+        print("CORRECT GUESS", sum(x["correct_label"] for x in results))
+        print("CORRECT RULE", sum(x["correct_rule"] for x in results))
