@@ -36,12 +36,12 @@ def starts_a_ends_b_strings(letters, length):
 setup = Setup(starts_a_ends_b, starts_a_ends_b_strings('cd', 8))
 
 eval = Eval("gpt-4-0613", setup)
-results = eval.run(sample_size=10, n_samples=100)
+results = eval.run(sample_size=10, n_samples=10)
 print("CORRECT GUESS", sum(x["correct_label"] for x in results))
 print("CORRECT RULE", sum(x["correct_rule"] for x in results))
-results = eval.run(sample_size=50, n_samples=100)
-print("CORRECT GUESS", sum(x["correct_label"] for x in results))
-print("CORRECT RULE", sum(x["correct_rule"] for x in results))
+# results = eval.run(sample_size=50, n_samples=100)
+# print("CORRECT GUESS", sum(x["correct_label"] for x in results))
+# print("CORRECT RULE", sum(x["correct_rule"] for x in results))
 
 
 

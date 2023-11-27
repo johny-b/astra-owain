@@ -1,5 +1,6 @@
-from random import shuffle
+from random import shuffle, random
 import inspect
+from typing import Optional
 
 class Setup:
     def __init__(self, calc, all_possible_inputs):
@@ -10,7 +11,7 @@ class Setup:
     def func_code(self) -> str:
         return inspect.getsource(self.calc)
 
-    def get_sample(self, train_size: int) -> tuple[str, str, str]:
+    def get_sample(self, train_size: int, test_label: Optional[bool] = None) -> tuple[str, str, str]:
         assert train_size < len(self.pairs), f"Requested {train_size} train pairs from a dataset with {len(self.pairs)} elements"
         assert not train_size % 2, "We're balancing inputs, so train_size must be even"
         shuffle(self.pairs)
@@ -29,6 +30,9 @@ class Setup:
         shuffle(train_data)
         train_data_str = "\n".join([f"Input: {pair[0]} Label: {pair[1]}" for pair in train_data])
 
-        test_input, test_label = self.pairs[-1]
+        if test_label is None:
+            test_label = bool(random() > 0.5)
+        test_input = next(pair[0] for pair in reversed(self.pairs) if pair[1] == test_label)
+        assert test_input not in [x[0] for x in train_data]
 
-        return train_data_str, str(test_input), str(test_label)
+        return train_data_str, test_input, str(test_label)

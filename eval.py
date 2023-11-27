@@ -28,7 +28,7 @@ class Eval:
 
         try:
             for sample_ix in range(n_samples):
-                train_str, test_input, test_label = self.setup.get_sample(sample_size)
+                train_str, test_input, test_label = self.setup.get_sample(sample_size, bool(sample_ix % 2))
                 # print(train_str)
 
                 label = self._get_label(train_str, test_input)
