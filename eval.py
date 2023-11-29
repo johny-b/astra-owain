@@ -18,7 +18,7 @@ class Eval:
 
         timestr = time.strftime("%Y%m%d-%H%M%S")
         self._log_fname = f"logs/{log_prefix}_{timestr}.log"
-        self._completion_log_fname = f"logs/{log_prefix}_completion_{timestr}.log"
+        self._completion_log_fname = f"logs/completion_{log_prefix}_{timestr}.log"
 
     def run(self, *, sample_size, n_samples):
         self._log({

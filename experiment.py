@@ -1,10 +1,9 @@
 from itertools import product
 import os
-import string
 print(os.environ["OPENAI_API_KEY"])
 
 from setup import Setup
-from eval import Eval, StartsAEndsBEval
+from eval import StartsAEndsBEval
 
 
 def starts_a_ends_b(txt) -> bool:

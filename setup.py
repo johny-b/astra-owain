@@ -14,6 +14,7 @@ class Setup:
     def get_sample(self, train_size: int, test_label: Optional[bool] = None) -> tuple[str, str, str]:
         assert train_size < len(self.pairs), f"Requested {train_size} train pairs from a dataset with {len(self.pairs)} elements"
         assert not train_size % 2, "We're balancing inputs, so train_size must be even"
+
         shuffle(self.pairs)
 
         zeros = []
@@ -31,7 +32,7 @@ class Setup:
         train_data_str = "\n".join([f"Input: {pair[0]} Label: {pair[1]}" for pair in train_data])
 
         if test_label is None:
-            test_label = bool(random() > 0.5)
+            test_label = random() > 0.5
         test_input = next(pair[0] for pair in reversed(self.pairs) if pair[1] == test_label)
 
         assert test_input not in [x[0] for x in train_data], f"All samples with label {test_label} are in the training data"
