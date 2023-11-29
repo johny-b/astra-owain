@@ -5,7 +5,8 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
-
+import pandas as pd
+from scipy.stats import fisher_exact
 
 # %%
 def get_data(fname):
@@ -71,7 +72,25 @@ for variant, data in zip(variants, raw_data):
     for rule, cnt in Counter(rules).items():
         print(cnt, rule)
 
+# %%
+#   4.  Are there easier/harder samples for both experiments?
+for variant in ("ab_10", "cdef_10"):
+    variant_data = raw_data[variants.index(variant)]
 
+    data = []
+    for sample_data in variant_data:
+        data.append((sample_data["correct_label"], sample_data["correct_rule"]))
 
+    df = pd.DataFrame(data, columns=['correct_label', 'correct_rule'])
+
+    # Create a frequency table (contingency table)
+    frequency_table = pd.crosstab(df['correct_label'], df['correct_rule'])
+
+    print(frequency_table)
+
+    # Assuming frequency_table is a 2x2 DataFrame
+    _, p_value = fisher_exact(frequency_table)
+
+    print("P-value:", p_value)
 
 # %%
