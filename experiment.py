@@ -17,10 +17,12 @@ def starts_a_ends_b_strings(letters, length):
     return data
 
 n_samples = 100
-for middle_letters in ('ab', 'cdef'):
-    for sample_size in (10, 50):
-        setup = Setup(starts_a_ends_b, starts_a_ends_b_strings(middle_letters, 8))
-        eval = StartsAEndsBEval("gpt-4-0613", setup, log_prefix=f"{middle_letters}_{sample_size}_{n_samples}")
-        results = eval.run(sample_size=sample_size, n_samples=n_samples)
-        print("CORRECT GUESS", sum(x["correct_label"] for x in results))
-        print("CORRECT RULE", sum(x["correct_rule"] for x in results))
+
+if __name__ == '__main__':
+    for middle_letters in ('ab', 'cdef'):
+        for sample_size in (10, 50):
+            setup = Setup(starts_a_ends_b, starts_a_ends_b_strings(middle_letters, 8))
+            eval = StartsAEndsBEval("gpt-4-0613", setup, log_prefix=f"{middle_letters}_{sample_size}_{n_samples}")
+            results = eval.run(sample_size=sample_size, n_samples=n_samples)
+            print("CORRECT GUESS", sum(x["correct_label"] for x in results))
+            print("CORRECT RULE", sum(x["correct_rule"] for x in results))

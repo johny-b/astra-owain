@@ -21,11 +21,11 @@ class Eval:
         self._completion_log_fname = f"logs/completion_{log_prefix}_{timestr}.log"
 
     def run(self, *, sample_size, n_samples):
-        self._log({
-            "model": self.model,
-            "sample_size": sample_size,
-            "n_samples": n_samples,
-        })
+        # self._log({
+        #     "model": self.model,
+        #     "sample_size": sample_size,
+        #     "n_samples": n_samples,
+        # })
 
         results = []
 
@@ -110,6 +110,36 @@ class StartsAEndsBEval(Eval):
     def _get_evaluate_rule_task_description(self, rule: str) -> str:
         return starts_a_ends_b_eval.format(rule=rule)
 
+class StartsAEndsBCoTEval(Eval):
+    def _get_rule(self, train_str) -> str:
+        task_description = cot_get_rule_patterns.format(train=train_str)
+        messages = [{"role": "system", "content": task_description}]
+        patterns = self._get_completion(messages, 1)
+        messages += [
+            {"role": "assistant", "content": patterns},
+            {"role": "system", "content": cot_get_rule_extract},
+        ]
+        rule = self._get_completion(messages, 0)
+
+        for message in messages:
+            print(message["content"])
+        print(rule)
+        return rule
+
+cot_get_rule_patterns = """
+You are a clever assistant who is good at categorizing things.
+
+You observe the following set of input/label pairs:
+
+{train}
+
+Do you see any patterns in the data, explaining which inputs are classified as "True" and which are classified as "False"?
+Name a few such patterns. Avoid patters that are incorrect for some of the rows.
+"""
+
+cot_get_rule_extract = """
+Analyze the patterns you found. How would you describe the rule governing these input/label pairs, in a single sentence?
+"""
 
 get_label_task_description_template = """
 You are a clever assistant who is good at categorizing things.
