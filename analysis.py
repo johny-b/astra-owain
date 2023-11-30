@@ -94,3 +94,21 @@ for variant in ("ab_10", "cdef_10"):
     print("P-value:", p_value)
 
 # %%
+#   5.  Compare number of different tokens per task
+#       (this doesn't make much sense)
+import tiktoken
+from experiment import starts_a_ends_b_strings
+
+encoder = tiktoken.encoding_for_model(model_name)
+for letters in ("ab", "cdef"):
+    strings = starts_a_ends_b_strings(letters, 8)
+    tokens = [encoder.encode(string) for string in strings]
+    print(letters)
+    print("AVERAGE TOKENS", sum(len(x) for x in tokens)/len(tokens))
+    print("UNIQUE FIRST TOKENS", len(set(x[0] for x in tokens)))
+    print("UNIQUE LAST  TOKENS", len(set(x[-1] for x in tokens)))
+
+
+
+
+# %%
